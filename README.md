@@ -1,0 +1,2 @@
+# Women-safety-device
+This project is an implementation of a device that saves and helps women from harassment in just a click of a button. In case of any danger, button switch present in the watch should be pressed, which fetches the latitude and longitude and sends it to a stored phone number, indicating danger. This project is built using Arduino, GPS module, GSM module, transmitter and receiver.

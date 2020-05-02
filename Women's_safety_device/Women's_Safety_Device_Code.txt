@@ -1,0 +1,68 @@
+#include <SoftwareSerial.h>
+#include <TinyGPS.h>
+TinyGPS gps;
+SoftwareSerial ss(4, 3);
+SoftwareSerial GPRS(7,8);
+boolean state,lastState;
+
+void setup() 
+{
+  pinMode(13,INPUT_PULLUP);
+  state=digitalRead(13);
+  lastState=state;
+  GPRS.begin(9600);
+  ss.begin(9600);
+  Serial.begin(9600);
+  delay(1000);
+}
+
+void loop()
+{
+  bool newData = false;
+  unsigned long chars;
+  float flat, flon;
+  unsigned long age;
+  {
+    while (ss.available())
+    {
+      char c = ss.read();
+      if (gps.encode(c)) 
+      newData = true;
+    }
+  }
+  if (newData)
+  {
+    gps.f_get_position(&flat, &flon, &age);
+    flat == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flat, 12;
+    flon == TinyGPS::GPS_INVALID_F_ANGLE ? 0.0 : flon, 12;
+    
+  }
+  while(GPRS.available())
+  {
+    Serial.write(GPRS.read());
+  }
+  lastState=state;
+  state=digitalRead(13);
+  if(state !=lastState)
+ {
+    Serial.print("switch was turned");
+    Serial.println(state?"on":"off");
+    GPRS.println("AT+CMGF=1");
+    delay(500);
+    GPRS.println("AT+CMGS=\"**********\""); //remove * and type your phone number
+    delay(500);
+    GPRS.print("I am in TROUBLE...");
+    GPRS.println();
+    GPRS.print("lat:");
+    GPRS.print(flat,12);
+    GPRS.println();
+    GPRS.print("lon:");
+    GPRS.print(flon,12);
+    GPRS.write(0x1a);
+    delay(500);
+ }
+ Serial.println(flat,12);
+ Serial.println(",");
+ Serial.println(flon,12);
+ delay(500);
+}
